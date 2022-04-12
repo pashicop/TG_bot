@@ -197,6 +197,18 @@ def set_user_timeout(con_db, user_timeout):
         c_insert.execute(db_query_insert)
         con_db.commit()
 
+def get_timeout():
+    con_db = connect_db()
+    with con_db.cursor() as c_select:
+        db_query_select = "SELECT timeout from config WHERE id = (SELECT MAX(id) from config)"
+        c_select.execute(db_query_select)
+        result = c_select.fetchall()
+        if result:
+            user_timeout = int(result[0][0])
+        else:
+            user_timeout = 15
+    return user_timeout
+
 if __name__ == '__main__':
     bot = telebot.TeleBot(TOKEN, parse_mode=None)
     now = datetime.now()
@@ -261,7 +273,7 @@ if __name__ == '__main__':
         close_db(conn)
         print(ip_from_db)
         if ip_from_db:
-            bot.reply_to(message, "\n".join(ip_from_db))
+            bot.reply_to(message, "\n".join(ip_from_db) + "\nТаймаут - " + str(get_timeout()) + " сек")
         else:
             bot.reply_to(message, "База пустая")
 
