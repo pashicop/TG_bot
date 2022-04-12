@@ -6,7 +6,6 @@ from datetime import datetime
 import telebot
 import re
 import json
-import yaml
 import mysql.connector
 
 TOKEN = "5145450144:AAFSQcu9yLCcYKtxLExPaDZUnNLnf1RY_YI"
