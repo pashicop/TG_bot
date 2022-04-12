@@ -188,10 +188,14 @@ def get_status(con_db):
                 list_status.append(ping_status)
     return list_status
 
+def send_message(group_id, message):
+    bot.send_message(group_id, message)
+
 if __name__ == '__main__':
     bot = telebot.TeleBot(TOKEN, parse_mode=None)
     now = datetime.now()
-    bot.send_message('-735404296', 'Бот запустился ' + now.strftime('%d/%m/%Y %H:%M:%S'))
+    send_message('-735404296', 'Бот запустился ' + now.strftime('%d/%m/%Y %H:%M:%S'))
+    # bot.send_message('-735404296', 'Бот запустился ' + now.strftime('%d/%m/%Y %H:%M:%S'))
 
     # check_ip(ip_list, conn)
     @bot.message_handler(commands=['start', 'help'])
@@ -263,7 +267,7 @@ if __name__ == '__main__':
         if ip_status:
             str_status = ""
             for ip in ip_status:
-                str_status += ip["ip"] + "\t" + ip["status"] + "\t" + ip["date"].strftime('%d/%m/%Y %H:%M:%S') + "\n"
+                str_status += ip["ip"] + " " + str(ip["status"]) + " " + ip["date"].strftime('%d/%m/%Y %H:%M:%S') + "\n"
             bot.reply_to(message, str_status)
         else:
             bot.reply_to(message, "База пустая")
@@ -277,7 +281,7 @@ if __name__ == '__main__':
         if ip_status:
             str_status = ""
             for ip in ip_status:
-                str_status += ip["ip"] + "\t" + ip["status"] + "\t" + ip["date"].strftime('%d/%m/%Y %H:%M:%S') + "\n"
+                str_status += ip["ip"] + " " + str(ip["status"]) + " " + ip["date"].strftime('%d/%m/%Y %H:%M:%S') + "\n"
             bot.reply_to(message, str_status)
         else:
             bot.reply_to(message, "База пустая")
@@ -290,13 +294,13 @@ if __name__ == '__main__':
         ip_status = get_status(conn)
         # ip_from_db = get_ip(conn)
         if ip_status:
-            # print(ip_from_db)
+            count_ok = 0
             str_status = ""
             for ip in ip_status:
-                # cur_date = ip["date"]
-                # print(cur_date)
-                # print(cur_date.strftime('%d/%m/%Y %H:%M:%S'))
-                str_status += ip["ip"] + "\t" + ip["status"] + "\t" + ip["date"].strftime('%d/%m/%Y %H:%M:%S') + "\n"
+                str_status += ip["ip"] + " " + str(ip["status"]) + " " + ip["date"].strftime('%d/%m/%Y %H:%M:%S') + "\n"
+                if ip["status"] == "OK":
+                    count_ok += 1
+            str_status += str(count_ok) + " из " + str(len(ip_status)) + " в сети"
             bot.reply_to(message, str_status)
         else:
             bot.reply_to(message, "База пустая")
