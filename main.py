@@ -190,6 +190,12 @@ def get_status(con_db):
 def send_message(group_id, message):
     bot.send_message(group_id, message)
 
+def set_user_timeout(con_db, user_timeout):
+    with con_db.cursor() as c_insert:
+        db_query_insert = "INSERT INTO config(timeout) VALUES('" + user_timeout + "'"
+        c_insert.execute(db_query_insert)
+        con_db.commit()
+
 if __name__ == '__main__':
     bot = telebot.TeleBot(TOKEN, parse_mode=None)
     now = datetime.now()
@@ -257,6 +263,20 @@ if __name__ == '__main__':
             bot.reply_to(message, "\n".join(ip_from_db))
         else:
             bot.reply_to(message, "База пустая")
+
+
+    @bot.message_handler(commands=['set'])
+    def set_timeout(message):
+        timeouts: list = message.text.split()
+        timeouts.remove('/set')
+        if isinstance(timeouts[0], int) and 15 < timeouts[0] < 600:
+            timeout = timeouts[0]
+            conn = connect_db()
+            set_user_timeout(conn, timeout)
+            bot.reply_to(message, timeout + " установлен")
+            close_db(conn)
+        else:
+            bot.reply_to(message, timeouts[0] + " не число от 15 до 600 сек")
 
 
     @bot.message_handler(commands=['alarm'])
