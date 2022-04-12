@@ -10,13 +10,14 @@ import mysql.connector
 
 TOKEN = "5145450144:AAFSQcu9yLCcYKtxLExPaDZUnNLnf1RY_YI"
 HELP = """
-help - напечатать справку
-add - добавить ip в pinger
-show - показать все ip
-status - показать ip со статусом
-alarm - показать недоступные ip
-normal - показать доступные ip
-remove - удалить ip в pinger
+/help - напечатать справку
+/add ip1 ip2 ... - добавить ip в pinger
+/show - показать все ip
+/status - показать ip со статусом
+/alarm - показать недоступные ip
+/normal - показать доступные ip
+/remove ip1 ip2 ... - удалить ip в pinger
+/set timeout - указать таймаут проверки (15-600сек)
 """
 def connect_db():
     connection = None
@@ -192,7 +193,7 @@ def send_message(group_id, message):
 
 def set_user_timeout(con_db, user_timeout):
     with con_db.cursor() as c_insert:
-        db_query_insert = "INSERT INTO config(timeout) VALUES('" + user_timeout + "'"
+        db_query_insert = "INSERT INTO config(timeout) VALUES('" + str(user_timeout) + "')"
         c_insert.execute(db_query_insert)
         con_db.commit()
 
@@ -269,14 +270,17 @@ if __name__ == '__main__':
     def set_timeout(message):
         timeouts: list = message.text.split()
         timeouts.remove('/set')
-        if isinstance(timeouts[0], int) and 15 < timeouts[0] < 600:
-            timeout = timeouts[0]
-            conn = connect_db()
-            set_user_timeout(conn, timeout)
-            bot.reply_to(message, timeout + " установлен")
-            close_db(conn)
-        else:
-            bot.reply_to(message, timeouts[0] + " не число от 15 до 600 сек")
+        try:
+            timeout = int(timeouts[0])
+            if 15 <= timeout <= 600:
+                conn = connect_db()
+                set_user_timeout(conn, timeout)
+                bot.reply_to(message, "Таймаут " + str(timeout) + " установлен")
+                close_db(conn)
+            else:
+                bot.reply_to(message, timeouts[0] + " не число от 15 до 600 сек")
+        except:
+            bot.reply_to(message, "Введите число от 15 до 600 сек")
 
 
     @bot.message_handler(commands=['alarm'])
